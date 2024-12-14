@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      padding: 2rem;
+    }
+
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+
+    .alert {
+      padding: 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .alert p {
+      margin: 0;
+    }
+
+    .form-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-container button:hover {
+      background-color: #e53935;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Delete User</h2>
+
+<!-- Display success message if available -->
+<div th:if="${message}" class="alert">
+  <p th:text="${message}"></p>
+</div>
+
+<!-- Delete User Form -->
+<div class="form-container">
+  <form action="#" th:action="@{/admin/delete}" method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+
+    <button type="submit">Delete</button>
+  </form>
+</div>
+
+<!-- Redirect button to homepage -->
+<a href="/admin" class="btn">Go to Homepage</a>
+
+</body>
+</html>

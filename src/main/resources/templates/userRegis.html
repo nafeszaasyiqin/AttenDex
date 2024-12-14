@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
+      padding: 2rem;
+    }
+
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+
+    .alert {
+      padding: 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .alert p {
+      margin: 0;
+    }
+
+    .form-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-container input, .form-container select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-container button:hover {
+      background-color: #45a049;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Register New User</h2>
+
+<!-- Display success message if available -->
+<div th:if="${message}" class="alert">
+  <p th:text="${message}"></p>
+</div>
+
+<!-- Registration Form -->
+<div class="form-container">
+  <form action="#" th:action="@{/admin/register}" method="post" th:object="${user}">
+    <label for="username">Username:</label>
+    <input type="text" id="username" th:field="*{username}" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" th:field="*{password}" required>
+
+    <label for="role">Role:</label>
+    <select id="role" th:field="*{role}">
+      <option value="ROLE_ADMIN">Admin</option>
+      <option value="ROLE_LECTURER">Lecturer</option>
+      <option value="ROLE_STUDENT">Student</option>
+    </select>
+
+    <button type="submit">Register</button>
+  </form>
+</div>
+
+<!-- Redirect button to homepage -->
+<a href="/admin" class="btn">Go to Homepage</a>
+
+</body>
+</html>
