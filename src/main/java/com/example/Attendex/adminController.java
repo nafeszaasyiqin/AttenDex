@@ -74,6 +74,26 @@ public class adminController {
     }
 
 
+    @GetMapping("/admin/dashboard")
+    public String showAdminDashboard(Model model) {
+        model.addAttribute("studentCount", 10);  // Example dynamic data
+        model.addAttribute("lecturerCount", 2);
+        return "admin-dashboard";
+    }
+
+    @GetMapping("/admin/manage-lecturers")
+    public String showManageLecturers() {
+        return "manage-lecturers"; // Corresponds to manage-lecturers.html
+    }
+
+    @GetMapping("/admin/manage-students")
+    public String showManageStudents() {
+        return "manage-students"; // Refers to manage-students.html
+    }
+
+
+
+
 
 
 }
