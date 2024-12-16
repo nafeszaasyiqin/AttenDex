@@ -17,7 +17,7 @@
     .sidebar {
         width: 250px;
         background-color: #f8f8f8;
-        padding: 10px;
+        padding: 20px 15px;
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     }
     .sidebar a {
@@ -34,6 +34,16 @@
     .sidebar a.active {
         color: #6a0dad;
         text-decoration: underline;
+    }
+    .sidebar div {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #555;
+        background-color: #e0e0e0; /* Light gray background */
+        padding: 10px;
+        border-radius: 5px; /* Rounded corners */
+        margin-bottom: 10px; /* Space between sections */
     }
 
     /* Header styling */
@@ -92,11 +102,11 @@
 <div class="sidebar">
   <a href="#" class="active">Dashboard</a>
   <div>LECTURERS</div>
-  <a href="#">Manage Lecturers</a>
+  <a href="/admin/manage-lecturers">Manage Lecturers</a>
   <div>STUDENTS</div>
-  <a href="#">Manage Students</a>
+  <a href="/admin/manage-students">Manage Students</a>
   <div>Report</div>
-  <a href="#">Log out</a>
+  <a href="/login">Log out</a>
 </div>
 
 <!-- Main content -->
@@ -111,13 +121,14 @@
   <div class="dashboard-cards">
     <div class="card">
       <h3>STUDENTS</h3>
-      <div>10</div>
+      <div th:text="${studentCount}">0</div> <!-- Correct way to display the value -->
     </div>
     <div class="card">
       <h3>LECTURERS</h3>
-      <div>2</div>
+      <div th:text="${lecturerCount}">0</div> <!-- Correct way to display the value -->
     </div>
   </div>
+
 </div>
 
 <!-- Footer -->

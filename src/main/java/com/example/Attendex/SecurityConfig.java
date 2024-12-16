@@ -37,7 +37,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) ->
                         authorize
-                                .requestMatchers("/admin").hasRole("ADMIN")  // Only ADMIN role can access /admin
+                                .requestMatchers("/admin-dashboard").hasRole("ADMIN")  // Only ADMIN role can access /admin
                                 .anyRequest().authenticated()  // Require authentication for all other requests
                 ).formLogin(
                         form -> form
@@ -63,8 +63,8 @@ public class SecurityConfig {
 
             // Handle redirection based on role
             if ("ROLE_ADMIN".equals(role)) {
-                System.out.println("Redirecting to /admin");
-                response.sendRedirect("/admin");
+                System.out.println("Redirecting to /admin-dashboard");
+                response.sendRedirect("/admin-dashboard");
             } else if ("ROLE_LECTURER".equals(role)) {
                 System.out.println("Redirecting to /lecturer");
                 response.sendRedirect("/lecturer");

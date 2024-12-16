@@ -10,26 +10,46 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 @Controller
 public class adminController {
 
     @Autowired
     private UserRepo userRepo;
 
-    // Display registration form
-    @GetMapping("/userRegis")
-    public String showRegisterForm(Model model) {
+    // Display lecturer registration form
+    @GetMapping("/regis-lecturer")
+    public String FormregisLect(Model model) {
         model.addAttribute("user", new UserEntity()); // Add a new UserEntity object to the model
-        return "userRegis"; // Points to the userRegis.html template
+        return "regis-lecturer"; // Points to the regis-lecturer.html template
     }
 
-    // Handle user registration
-    @PostMapping("/admin/register")
-    public String registerUser(UserEntity user, RedirectAttributes redirectAttributes) {
+
+    // Handle lecturer registration
+    @PostMapping("/admin/register-lecturer")
+    public String regisLect(UserEntity user, RedirectAttributes redirectAttributes) {
+        user.setRole("ROLE_LECTURER"); // Set role as lecturer
         userRepo.save(user); // Save the new user in the database
-        redirectAttributes.addFlashAttribute("message", "User successfully registered!"); // Flash success message
-        return "redirect:/userRegis"; // Redirect back to the register page
+        redirectAttributes.addFlashAttribute("message", "Lecturer successfully registered!"); // Flash success message
+        return "redirect:/regis-lecturer"; // Redirect back to the lecturer registration page
     }
+
+    // Display student registration form
+    @GetMapping("/regis-student")
+    public String FormregisStud(Model model) {
+        model.addAttribute("user", new UserEntity()); // Add a new UserEntity object to the model
+        return "regis-student"; // Points to the regis-student.html template
+    }
+
+    // Handle student registration
+    @PostMapping("/admin/register-student")
+    public String regisStud(UserEntity user, RedirectAttributes redirectAttributes) {
+        user.setRole("ROLE_STUDENT"); // Set role as student
+        userRepo.save(user); // Save the new user in the database
+        redirectAttributes.addFlashAttribute("message", "Student successfully registered!"); // Flash success message
+        return "redirect:/regis-student"; // Redirect back to the student registration page
+    }
+
 
     // Display update form
     @GetMapping("/admin/update")
@@ -37,12 +57,20 @@ public class adminController {
         return "admin-update";
     }
 
-    @GetMapping("/admin/view")
-    public String viewUsers(Model model) {
+    @GetMapping("/view-student")
+    public String viewStud(Model model) {
         // Fetch all users from the database
         model.addAttribute("users", userRepo.findAll()); // Add all users to the model
-        return "admin-view"; // Redirect to the view-users.html template
+        return "view-student"; // Redirect to the view-users.html template
     }
+
+    @GetMapping("/view-lecturer")
+    public String viewLect(Model model) {
+        // Fetch all users from the database
+        model.addAttribute("users", userRepo.findAll()); // Add all users to the model
+        return "view-lecturer"; // Redirect to the view-users.html template
+    }
+
 
 
     // Handle user update
@@ -74,12 +102,22 @@ public class adminController {
     }
 
 
-    @GetMapping("/admin/dashboard")
-    public String showAdminDashboard(Model model) {
-        model.addAttribute("studentCount", 10);  // Example dynamic data
-        model.addAttribute("lecturerCount", 2);
-        return "admin-dashboard";
+    @GetMapping("/admin-dashboard")
+    public String getDashboard(Model model) {
+        long studentCount = userRepo.countByRole("ROLE_STUDENT");
+        long lecturerCount = userRepo.countByRole("ROLE_LECTURER");
+
+        System.out.println("Student Count: " + studentCount);  // Debugging log
+        System.out.println("Lecturer Count: " + lecturerCount);  // Debugging log
+
+        model.addAttribute("studentCount", studentCount);
+        model.addAttribute("lecturerCount", lecturerCount);
+
+        return "admin-dashboard";  // Should be rendered with the counts
     }
+
+
+
 
     @GetMapping("/admin/manage-lecturers")
     public String showManageLecturers() {

@@ -43,8 +43,8 @@
     </tr>
     </thead>
     <tbody>
-    <!-- Loop through users and display each user's details -->
-    <tr th:each="user : ${users}">
+    <!-- Loop through users and display only students -->
+    <tr th:each="user : ${users}" th:if="${user.role == 'ROLE_LECTURER'}">
         <td th:text="${user.username}"></td>
         <td th:text="${user.password}"></td>
         <td th:text="${user.role}"></td>
@@ -60,6 +60,6 @@
 <br><br>
 
 <!-- Redirect button to homepage -->
-<a href="/admin" class="btn">Go to Homepage</a>
+<a href="/admin/manage-lecturers" class="btn">Back</a>
 </body>
 </html>

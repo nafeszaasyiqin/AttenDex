@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Student</title>
+    <title>Manage Students</title>
     <style>
         /* General styles */
         body {
@@ -17,7 +17,7 @@
         .sidebar {
             width: 250px;
             background-color: #f8f8f8;
-            padding: 10px;
+            padding: 20px 15px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
         .sidebar a {
@@ -34,6 +34,16 @@
         .sidebar a.active {
             color: #6a0dad;
             text-decoration: underline;
+        }
+        .sidebar div {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #555;
+            background-color: #e0e0e0; /* Light gray background */
+            padding: 10px;
+            border-radius: 5px; /* Rounded corners */
+            margin-bottom: 10px; /* Space between sections */
         }
 
         /* Header styling */
@@ -94,28 +104,27 @@
 <body>
 <!-- Sidebar -->
 <div class="sidebar">
-    <a href="#" class="active">Dashboard</a>
+    <a href="/admin-dashboard" >Dashboard</a>
     <div>LECTURERS</div>
-    <a href="#">Manage Lecturers</a>
+    <a href="/admin/manage-lecturers">Manage Lecturers</a>
     <div>STUDENTS</div>
-    <a href="#">Manage Students</a>
+    <a href="/admin/manage-students"class="active">Manage Students</a>
     <div>Report</div>
-    <a href="#">Log out</a>
+    <a href="/login">Log out</a>
 </div>
 
 <!-- Main content -->
 <div class="content">
     <!-- Header -->
     <div class="header">
-        <h2>Manage Student</h2>
+        <h2>Manage Students</h2>
         <div>Welcome, Admin!</div>
     </div>
 
     <!-- Buttons -->
     <div class="buttons-container">
-        <a href="#" class="button">View</a>
-        <a href="#" class="button">Update</a>
-        <a href="#" class="button">Delete</a>
+        <a href="/view-student" class="button">View</a>
+        <a href="/regis-student" class="button">Register</a>
     </div>
 </div>
 

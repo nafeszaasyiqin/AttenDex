@@ -27,8 +27,9 @@ public class WelcomeController {
         return "student"; // Maps to student.html
     }
 
-    @GetMapping("/admin")
+    /*
+    @GetMapping("/admin-dashboard")
     public String Administrator() {
-        return "admin"; // Maps to welcome.html
-    }
+        return "admin-dashboard"; // Maps to welcome.html
+    } */
 }
