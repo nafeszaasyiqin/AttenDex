@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>View Classes</title>
+</head>
+<body>
+<h1>View Classes</h1>
+
+<!-- Success message after class creation -->
+<div th:if="${message}" class="alert">
+    <p th:text="${message}"></p>
+</div>
+
+<!-- Filter Form -->
+<form action="/lecturer/view-class" method="get">
+    <label for="filterOption">Filter by:</label>
+    <select id="filterOption" name="filterOption">
+        <option value="">--Select--</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="today">Today</option>
+        <option value="tomorrow">Tomorrow</option>
+    </select>
+
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" name="startDate">
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" name="endDate">
+
+    <button type="submit">Filter</button>
+</form>
+
+
+<!-- Table to Display Classes -->
+<table border="1">
+    <thead>
+    <tr>
+        <th>Class Name</th>
+        <th>Class Date</th>
+        <th>Class Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Loop through filtered classes -->
+    <tr th:each="class : ${classes}">
+        <td th:text="${class.className}"></td>
+        <td th:text="${class.classDate}"></td>
+        <td th:text="${class.classTime}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+<a href="/lecturer/manage-class">Create New Class</a>
+</body>
+</html>

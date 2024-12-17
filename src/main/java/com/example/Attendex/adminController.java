@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 
 @Controller
@@ -18,10 +20,10 @@ public class adminController {
     private UserRepo userRepo;
 
     // Display lecturer registration form
-    @GetMapping("/regis-lecturer")
+    @GetMapping("/admin/regis-lecturer")
     public String FormregisLect(Model model) {
         model.addAttribute("user", new UserEntity()); // Add a new UserEntity object to the model
-        return "regis-lecturer"; // Points to the regis-lecturer.html template
+        return "/admin/regis-lecturer"; // Points to the regis-lecturer.html template
     }
 
 
@@ -31,14 +33,14 @@ public class adminController {
         user.setRole("ROLE_LECTURER"); // Set role as lecturer
         userRepo.save(user); // Save the new user in the database
         redirectAttributes.addFlashAttribute("message", "Lecturer successfully registered!"); // Flash success message
-        return "redirect:/regis-lecturer"; // Redirect back to the lecturer registration page
+        return "redirect:/admin/regis-lecturer"; // Redirect back to the lecturer registration page
     }
 
     // Display student registration form
-    @GetMapping("/regis-student")
+    @GetMapping("/admin/regis-student")
     public String FormregisStud(Model model) {
         model.addAttribute("user", new UserEntity()); // Add a new UserEntity object to the model
-        return "regis-student"; // Points to the regis-student.html template
+        return "/admin/regis-student"; // Points to the regis-student.html template
     }
 
     // Handle student registration
@@ -47,34 +49,34 @@ public class adminController {
         user.setRole("ROLE_STUDENT"); // Set role as student
         userRepo.save(user); // Save the new user in the database
         redirectAttributes.addFlashAttribute("message", "Student successfully registered!"); // Flash success message
-        return "redirect:/regis-student"; // Redirect back to the student registration page
+        return "redirect:/admin/regis-student"; // Redirect back to the student registration page
     }
 
 
     // Display update form
-    @GetMapping("/admin/update")
+    @GetMapping("/admin/admin/update")
     public String showUpdateForm() {
-        return "admin-update";
+        return "/admin/admin-update";
     }
 
-    @GetMapping("/view-student")
+    @GetMapping("/admin/view-student")
     public String viewStud(Model model) {
         // Fetch all users from the database
         model.addAttribute("users", userRepo.findAll()); // Add all users to the model
-        return "view-student"; // Redirect to the view-users.html template
+        return "/admin/view-student"; // Redirect to the view-users.html template
     }
 
-    @GetMapping("/view-lecturer")
+    @GetMapping("/admin/view-lecturer")
     public String viewLect(Model model) {
         // Fetch all users from the database
         model.addAttribute("users", userRepo.findAll()); // Add all users to the model
-        return "view-lecturer"; // Redirect to the view-users.html template
+        return "/admin/view-lecturer"; // Redirect to the view-users.html template
     }
 
 
 
     // Handle user update
-    @PostMapping("/admin/update")
+    @PostMapping("/admin/admin/update")
     public String updateUser(String username, String password, String role, RedirectAttributes redirectAttributes) {
         UserEntity user = userRepo.findByUsername(username).orElse(null);
         if (user != null) {
@@ -85,48 +87,59 @@ public class adminController {
             userRepo.save(user); // Save the updated user
             redirectAttributes.addFlashAttribute("message", "User successfully updated!"); // Flash success message
         }
-        return "redirect:/admin/update"; // Redirect to admin page or list of users
+        return "redirect:/admin/admin/update"; // Redirect to admin page or list of users
     }
 
     // Display delete form
-    @GetMapping("/admin/delete")
+    @GetMapping("/admin/admin/delete")
     public String showDeleteForm() {
-        return "admin-delete";
+        return "/admin/admin-delete";
     }
 
-    @PostMapping("/admin/delete")
+    @PostMapping("/admin/admin/delete")
     public String deleteUser(String username, RedirectAttributes redirectAttributes) {
         userRepo.deleteById(username); // Delete the user by username
         redirectAttributes.addFlashAttribute("message", "User successfully deleted!"); // Flash success message
-        return "redirect:/admin/delete"; // Redirect to admin page or list of users
+        return "redirect:/admin/admin/delete"; // Redirect to admin page or list of users
     }
 
 
-    @GetMapping("/admin-dashboard")
+    @GetMapping("/admin/admin-dashboard")
     public String getDashboard(Model model) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Get the username
+
         long studentCount = userRepo.countByRole("ROLE_STUDENT");
         long lecturerCount = userRepo.countByRole("ROLE_LECTURER");
 
         System.out.println("Student Count: " + studentCount);  // Debugging log
         System.out.println("Lecturer Count: " + lecturerCount);  // Debugging log
 
+        model.addAttribute("username", username);
         model.addAttribute("studentCount", studentCount);
         model.addAttribute("lecturerCount", lecturerCount);
 
-        return "admin-dashboard";  // Should be rendered with the counts
+        return "admin/admin-dashboard";  // Should be rendered with the counts
     }
 
 
 
 
-    @GetMapping("/admin/manage-lecturers")
-    public String showManageLecturers() {
-        return "manage-lecturers"; // Corresponds to manage-lecturers.html
+    @GetMapping("/admin/admin/manage-lecturers")
+    public String showManageLecturers(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Get the username
+        model.addAttribute("username", username);
+        return "/admin/manage-lecturers"; // Corresponds to manage-lecturers.html
     }
 
-    @GetMapping("/admin/manage-students")
-    public String showManageStudents() {
-        return "manage-students"; // Refers to manage-students.html
+    @GetMapping("/admin/admin/manage-students")
+    public String showManageStudents(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Get the username
+        model.addAttribute("username", username);
+        return "/admin/manage-students"; // Refers to manage-students.html
     }
 
 

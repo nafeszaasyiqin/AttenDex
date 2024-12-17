@@ -104,11 +104,11 @@
 <body>
 <!-- Sidebar -->
 <div class="sidebar">
-    <a href="/admin-dashboard" >Dashboard</a>
+    <a href="/admin/admin-dashboard" >Dashboard</a>
     <div>LECTURERS</div>
-    <a href="/admin/manage-lecturers">Manage Lecturers</a>
+    <a href="/admin/admin/manage-lecturers">Manage Lecturers</a>
     <div>STUDENTS</div>
-    <a href="/admin/manage-students"class="active">Manage Students</a>
+    <a href="/admin/admin/manage-students"class="active">Manage Students</a>
     <div>Report</div>
     <a href="/login">Log out</a>
 </div>
@@ -118,13 +118,13 @@
     <!-- Header -->
     <div class="header">
         <h2>Manage Students</h2>
-        <div>Welcome, Admin!</div>
+        <div>Welcome, <span th:text="${username}">Admin</span>!</div>
     </div>
 
     <!-- Buttons -->
     <div class="buttons-container">
-        <a href="/view-student" class="button">View</a>
-        <a href="/regis-student" class="button">Register</a>
+        <a href="/admin/view-student" class="button">View</a>
+        <a href="/admin/regis-student" class="button">Register</a>
     </div>
 </div>
 

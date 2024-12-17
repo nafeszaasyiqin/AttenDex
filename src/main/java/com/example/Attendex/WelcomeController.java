@@ -17,19 +17,21 @@ public class WelcomeController {
         return "login"; // Maps to login.html
     }
 
-    @GetMapping("/lecturer")
+    @GetMapping("/lecturer/lecturer")
     public String lecturerDashboard() {
-        return "lecturer"; // Maps to lecturer.html
+        return "/lecturer/lecturer"; // Maps to lecturer.html
     }
 
-    @GetMapping("/student")
-    public String studentDashboard() {
-        return "student"; // Maps to student.html
-    }
+
 
     /*
     @GetMapping("/admin-dashboard")
     public String Administrator() {
         return "admin-dashboard"; // Maps to welcome.html
     } */
+
+    @GetMapping("/manage-class")
+    public String manageClasses() {
+        return "lecturer/manage-class"; // Points to templates/lecturer/manage-class.html
+    }
 }

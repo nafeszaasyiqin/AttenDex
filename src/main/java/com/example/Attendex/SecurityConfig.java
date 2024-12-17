@@ -37,7 +37,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) ->
                         authorize
-                                .requestMatchers("/admin-dashboard").hasRole("ADMIN")  // Only ADMIN role can access /admin
+                                .requestMatchers("/admin/admin-dashboard").hasRole("ADMIN")  // Only ADMIN role can access /admin
                                 .anyRequest().authenticated()  // Require authentication for all other requests
                 ).formLogin(
                         form -> form
@@ -58,19 +58,22 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler customSuccessHandler() {
         return (HttpServletRequest request, HttpServletResponse response,
                 org.springframework.security.core.Authentication authentication) -> {
+            String username = authentication.getName();  // Get the username of the logged-in user
+            System.out.println("Logged-in user: " + username);  // Log the username for debugging
+
             String role = authentication.getAuthorities().iterator().next().getAuthority();
             System.out.println("Role retrieved: " + role); // Debug role retrieval
 
             // Handle redirection based on role
             if ("ROLE_ADMIN".equals(role)) {
-                System.out.println("Redirecting to /admin-dashboard");
-                response.sendRedirect("/admin-dashboard");
+                System.out.println("Redirecting to /admin/admin-dashboard");
+                response.sendRedirect("/admin/admin-dashboard");
             } else if ("ROLE_LECTURER".equals(role)) {
                 System.out.println("Redirecting to /lecturer");
-                response.sendRedirect("/lecturer");
+                response.sendRedirect("/lecturer/lecturer");
             } else if ("ROLE_STUDENT".equals(role)) {
                 System.out.println("Redirecting to /student");
-                response.sendRedirect("/student");
+                response.sendRedirect("/student/student");
             } else {
                 System.out.println("Redirecting to /welcome");
                 response.sendRedirect("/welcome");

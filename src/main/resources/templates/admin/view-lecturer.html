@@ -50,8 +50,8 @@
         <td th:text="${user.role}"></td>
         <td>
             <!-- Links for editing and deleting -->
-            <a th:href="@{/admin/update(username=${user.username})}" class="btn">Edit</a>
-            <a th:href="@{/admin/delete(username=${user.username})}" class="btn" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+            <a th:href="@{/admin/admin/update(username=${user.username})}" class="btn">Edit</a>
+            <a th:href="@{/admin/admin/delete(username=${user.username})}" class="btn" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
         </td>
     </tr>
     </tbody>
@@ -60,6 +60,6 @@
 <br><br>
 
 <!-- Redirect button to homepage -->
-<a href="/admin/manage-lecturers" class="btn">Back</a>
+<a href="/admin/admin/manage-lecturers" class="btn">Back</a>
 </body>
 </html>
