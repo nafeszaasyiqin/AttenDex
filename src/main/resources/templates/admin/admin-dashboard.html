@@ -1,139 +1,323 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administrator Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <style>
-    /* General styles */
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        height: 100vh;
-    }
-    /* Sidebar styling */
-    .sidebar {
-        width: 250px;
-        background-color: #f8f8f8;
-        padding: 20px 15px;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    }
-    .sidebar a {
-        display: block;
-        padding: 10px 15px;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .sidebar a:hover {
-        color: #6a0dad;
-    }
-    .sidebar a.active {
-        color: #6a0dad;
-        text-decoration: underline;
-    }
-    .sidebar div {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-top: 20px;
-        color: #555;
-        background-color: #e0e0e0; /* Light gray background */
-        padding: 10px;
-        border-radius: 5px; /* Rounded corners */
-        margin-bottom: 10px; /* Space between sections */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Attendex</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6a0dad;
+            --success-color: #2ecc71;
+            --sidebar-width: 280px;
+        }
 
-    /* Header styling */
-    .header {
-        background-color: #333;
-        color: white;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-    }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
 
-    /* Dashboard container */
-    .content {
-        flex: 1;
-        padding: 20px;
-        background-color: #f9f9f9;
-    }
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
 
-    /* Dashboard cards */
-    .dashboard-cards {
-        display: flex;
-        gap: 20px;
-        margin-top: 20px;
-    }
-    .card {
-        background-color: #333;
-        color: white;
-        flex: 1;
-        padding: 20px;
-        text-align: center;
-        border-radius: 8px;
-        font-size: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    .card h3 {
-        margin: 0 0 10px;
-    }
+        /* Sidebar styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #2c3e50 0%, #3498db 100%);
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+            color: white;
+        }
 
-    /* Footer */
-    .footer {
-        background-color: #333;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-    }
-  </style>
+        .nav-section {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+            margin: 1.5rem 0 0.5rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        /* Stats cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Quick actions */
+        .actions-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(74,144,226,0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover .action-icon {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .action-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-info p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<!-- Sidebar -->
-<div class="sidebar">
-  <a href="/admin/admin-dashboard" class="active">Dashboard</a>
-  <div>LECTURERS</div>
-  <a href="/admin/admin/manage-lecturers">Manage Lecturers</a>
-  <div>STUDENTS</div>
-  <a href="/admin/admin/manage-students">Manage Students</a>
-  <div>Report</div>
-  <a href="/login">Log out</a>
-</div>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h4 class="text-center mb-4">Attendex Admin</h4>
+            <nav>
+                <a href="/admin/admin-dashboard" class="nav-link active">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <div class="nav-section">LECTURERS</div>
+                <a href="/admin/admin/manage-lecturers" class="nav-link">
+                    <i class="fas fa-chalkboard-teacher"></i> Manage Lecturers
+                </a>
+                <div class="nav-section">STUDENTS</div>
+                <a href="/admin/admin/manage-students" class="nav-link">
+                    <i class="fas fa-user-graduate"></i> Manage Students
+                </a>
+                <a href="/logout" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </div>
 
-<!-- Main content -->
-<div class="content">
-  <!-- Header -->
-  <div class="header">
-    <h2>Administrator Dashboard</h2>
-    <div>Welcome, <span th:text="${username}">Admin</span>!</div>
-  </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Admin Dashboard</h2>
+                <div class="welcome-text">Welcome, Admin!</div>
+            </div>
 
-  <!-- Dashboard Stats -->
-  <div class="dashboard-cards">
-    <div class="card">
-      <h3>STUDENTS</h3>
-      <div th:text="${studentCount}">0</div> <!-- Correct way to display the value -->
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: rgba(46,204,113,0.1); color: #2ecc71;">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${studentCount}">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: rgba(52,152,219,0.1); color: #3498db;">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${lecturerCount}">0</div>
+                        <div class="stat-label">Total Lecturers</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h4 class="mt-4 mb-3">Quick Actions</h4>
+            <div class="actions-container">
+                <a href="/admin/regis-lecturer" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>Add Lecturer</h3>
+                        <p>Register a new lecturer</p>
+                    </div>
+                </a>
+
+                <a href="/admin/regis-student" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>Add Student</h3>
+                        <p>Register a new student</p>
+                    </div>
+                </a>
+
+                <a href="/admin/view-lecturer" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>View Lecturers</h3>
+                        <p>Manage lecturer accounts</p>
+                    </div>
+                </a>
+
+                <a href="/admin/view-student" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>View Students</h3>
+                        <p>Manage student accounts</p>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="card">
-      <h3>LECTURERS</h3>
-      <div th:text="${lecturerCount}">0</div> <!-- Correct way to display the value -->
-    </div>
-  </div>
 
-</div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mobile sidebar toggle
+        $(document).ready(function() {
+            // Add mobile toggle button
+            if ($(window).width() <= 768) {
+                $('body').prepend(`
+                    <button class="btn btn-primary position-fixed" 
+                            style="top: 10px; left: 10px; z-index: 1001;"
+                            onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                `);
+            }
+        });
 
-<!-- Footer -->
-<div class="footer">
-  &copy; 2024 Attendex. All rights reserved.
-</div>
+        function toggleSidebar() {
+            $('.sidebar').toggleClass('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        $(document).on('click', function(e) {
+            if ($(window).width() <= 768) {
+                if (!$(e.target).closest('.sidebar').length && 
+                    !$(e.target).closest('[onclick="toggleSidebar()"]').length) {
+                    $('.sidebar').removeClass('active');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

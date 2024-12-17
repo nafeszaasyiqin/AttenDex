@@ -1,141 +1,245 @@
 package com.example.Attendex;
 
-import com.example.Attendex.model.ClassEntity;
-import com.example.Attendex.model.ClassRegistration;
-import com.example.Attendex.model.UserEntity;
-import com.example.Attendex.model.Attendance; // Assuming you create an Attendance model
-import com.example.Attendex.repo.ClassRepo;
-import com.example.Attendex.repo.ClassUserRepo;
-import com.example.Attendex.repo.UserRepo;
-import com.example.Attendex.repo.AttendanceRepo; // Assuming you create an AttendanceRepo
+import com.example.Attendex.model.*;
+import com.example.Attendex.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import com.opencsv.CSVWriter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.security.SecureRandom;
 
 @Controller
+@RequestMapping("/lecturer")
 public class LecturerController {
 
     @Autowired
-    private ClassRepo classRepo;
+    private CourseRepo courseRepo;
+
+    @Autowired
+    private ClassSessionRepo classSessionRepo;
+
+    @Autowired
+    private AttendanceRepo attendanceRepo;
 
     @Autowired
     private UserRepo userRepo;
 
-    @Autowired
-    private ClassUserRepo classRegistrationRepo;  // Repo for ClassRegistration
+    private static final String CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final int CODE_LENGTH = 6;
+    private final SecureRandom random = new SecureRandom();
 
-    @Autowired
-    private AttendanceRepo attendanceRepo;  // Repo for Attendance
-
-    // Display create class form
-    @GetMapping("/lecturer/manage-class")
-    public String showManageClasses(Model model) {
-        return "lecturer/manage-class";  // Return the manage-class.html template
+    @GetMapping("/dashboard")
+    public String dashboard(Model model, Authentication authentication) {
+        UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        model.addAttribute("courses", courses);
+        return "/lecturer/lecturer";
     }
 
-    // Handle class creation
-    @PostMapping("/lecturer/create-class")
-    public String createClass(@RequestParam("className") String className,
-                              @RequestParam("classDate") String classDate,
-                              @RequestParam("classTime") String classTime,
-                              RedirectAttributes redirectAttributes) {
-        String username = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        Optional<UserEntity> lecturer = userRepo.findByUsername(username);
-
-        // Create and save the class entity
-        ClassEntity newClass = new ClassEntity();
-        newClass.setClassName(className);
-        newClass.setClassDate(classDate);
-        newClass.setClassTime(classTime);
-        newClass.setLecturer(lecturer.orElse(null));
-
-        classRepo.save(newClass);
-
-        redirectAttributes.addFlashAttribute("message", "Class successfully created!");
-        return "redirect:/lecturer/manage-class";
-    }
-
-    // Display classes for lecturer
-    @GetMapping("/lecturer/view-class")
-    public String viewClasses(@RequestParam(value = "filterOption", required = false) String filterOption,
-                              @RequestParam(value = "startDate", required = false) String startDate,
-                              @RequestParam(value = "endDate", required = false) String endDate,
-                              Model model) {
-        String username = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        Optional<UserEntity> lecturer = userRepo.findByUsername(username);
-
-        List<ClassEntity> classes;
-
-        if ("yesterday".equalsIgnoreCase(filterOption)) {
-            LocalDate yesterday = LocalDate.now().minusDays(1);
-            classes = classRepo.findByClassDate(yesterday.toString());
-        } else if ("today".equalsIgnoreCase(filterOption)) {
-            LocalDate today = LocalDate.now();
-            classes = classRepo.findByClassDate(today.toString());
-        } else if ("tomorrow".equalsIgnoreCase(filterOption)) {
-            LocalDate tomorrow = LocalDate.now().plusDays(1);
-            classes = classRepo.findByClassDate(tomorrow.toString());
-        } else if (startDate != null && endDate != null) {
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
-            classes = classRepo.findByClassTimeBetween(start.toString(), end.toString());
-        } else {
-            classes = classRepo.findByLecturer(lecturer.orElse(null));
+    @PostMapping("/generate-code/{courseId}")
+    @ResponseBody
+    public Map<String, String> generateClassCode(@PathVariable Long courseId) {
+        CourseEntity course = courseRepo.findById(courseId).orElseThrow();
+        
+        // Generate random code
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            code.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
         }
 
-        model.addAttribute("classes", classes);
-        return "lecturer/view-class";
+        // Create new class session
+        ClassSessionEntity session = new ClassSessionEntity();
+        session.setCourse(course);
+        session.setClassCode(code.toString());
+        session.setSessionDateTime(LocalDateTime.now());
+        classSessionRepo.save(session);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("code", code.toString());
+        return response;
     }
 
-    // Display attendance page for a specific class
-    @GetMapping("/lecturer/manage-attendance")
-    public String showAttendancePage(@RequestParam("classId") Long classId, Model model) {
-        // Get the class entity and registered students for this class
-        ClassEntity classEntity = classRepo.findById(classId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid class ID"));
-
-        List<ClassRegistration> classRegistrations = classRegistrationRepo.findByClassEntity(classEntity);
-        model.addAttribute("classEntity", classEntity);
-        model.addAttribute("classRegistrations", classRegistrations);
-        return "/lecturer/manage-attendance";  // Template to display attendance
+    @GetMapping("/view-attendance")
+    public String viewAttendance(Model model, Authentication authentication) {
+        UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        model.addAttribute("courses", courses);
+        return "/lecturer/view-attendance";
     }
 
-    // Handle attendance marking
-    @PostMapping("/lecturer/manage-attendance")
-    public String markAttendance(@RequestParam("classId") Long classId,
-                                 @RequestParam Map<String, String> attendanceData,
-                                 RedirectAttributes redirectAttributes) {
-        ClassEntity classEntity = classRepo.findById(classId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid class ID"));
+    @GetMapping("/attendance-data")
+    @ResponseBody
+    public Map<String, Object> getAttendanceData(
+            @RequestParam Long courseId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime sessionDate) {
+        
+        CourseEntity course = courseRepo.findById(courseId).orElseThrow();
+        List<ClassSessionEntity> sessions = classSessionRepo.findByCourseAndSessionDateTimeBetween(
+            course, 
+            sessionDate.toLocalDate().atStartOfDay(),
+            sessionDate.toLocalDate().plusDays(1).atStartOfDay()
+        );
 
-        // Loop through the attendance data (which contains student usernames)
-        for (String username : attendanceData.keySet()) {
-            if ("true".equals(attendanceData.get(username))) {
-                UserEntity student = userRepo.findByUsername(username)
-                        .orElseThrow(() -> new IllegalArgumentException("Student not found"));
-
-                // Create and save attendance record
-                Attendance attendance = new Attendance();
-                attendance.setClassEntity(classEntity);
-                attendance.setStudent(student);
-                attendance.setPresent(true);
-
-                attendanceRepo.save(attendance);
+        List<Map<String, Object>> attendanceData = new ArrayList<>();
+        if (!sessions.isEmpty()) {
+            ClassSessionEntity session = sessions.get(0);
+            List<AttendanceEntity> attendances = attendanceRepo.findByClassSession(session);
+            
+            for (AttendanceEntity attendance : attendances) {
+                Map<String, Object> record = new HashMap<>();
+                record.put("studentName", attendance.getStudent().getUsername());
+                record.put("status", attendance.isPresent() ? "Present" : "Absent");
+                attendanceData.add(record);
             }
         }
 
-        redirectAttributes.addFlashAttribute("message", "Attendance successfully marked!");
-        return "redirect:/lecturer/manage-attendance?classId=" + classId;
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", attendanceData);
+        return response;
     }
+
+    @GetMapping("/generate-report")
+    public String showReportForm(Model model, Authentication authentication) {
+        UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        model.addAttribute("courses", courses);
+        return "/lecturer/generate-report";
+    }
+
+    @GetMapping("/download-report")
+    public void downloadReport(
+            @RequestParam Long courseId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam String format,
+            HttpServletResponse response) throws IOException {
+        
+        CourseEntity course = courseRepo.findById(courseId).orElseThrow();
+        List<ClassSessionEntity> sessions = classSessionRepo.findByCourseAndSessionDateTimeBetween(course, startDate, endDate);
+
+        if ("csv".equals(format)) {
+            generateCsvReport(sessions, response);
+        } else if ("pdf".equals(format)) {
+            generatePdfReport(sessions, response);
+        }
+    }
+
+    private void generateCsvReport(List<ClassSessionEntity> sessions, HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"attendance_report.csv\"");
+
+        StringWriter stringWriter = new StringWriter();
+        CSVWriter csvWriter = new CSVWriter(stringWriter);
+
+        // Write header
+        csvWriter.writeNext(new String[]{"Student", "Date", "Status"});
+
+        // Write data
+        for (ClassSessionEntity session : sessions) {
+            List<AttendanceEntity> attendances = attendanceRepo.findByClassSession(session);
+            for (AttendanceEntity attendance : attendances) {
+                csvWriter.writeNext(new String[]{
+                    attendance.getStudent().getUsername(),
+                    session.getSessionDateTime().toString(),
+                    attendance.isPresent() ? "Present" : "Absent"
+                });
+            }
+        }
+
+        response.getWriter().write(stringWriter.toString());
+    }
+
+    private void generatePdfReport(List<ClassSessionEntity> sessions, HttpServletResponse response) throws IOException {
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+    
+        PDPageContentStream contentStream = new PDPageContentStream(document, page); // Initialize contentStream once
+        try {
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+            float margin = 50;
+            float yStart = page.getMediaBox().getHeight() - margin;
+            float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
+            float yPosition = yStart;
+            float tableHeight = 20f;
+            final int rows = sessions.size() + 1;
+            final int cols = 3;
+            float rowHeight = 20f;
+            float tableYBottom = yPosition - (rows * rowHeight);
+            float cellMargin = 5f;
+    
+            // Draw header
+            contentStream.beginText();
+            contentStream.newLineAtOffset(margin, yStart);
+            contentStream.showText("Attendance Report");
+            contentStream.endText();
+            
+            yPosition -= 30;
+    
+            // Draw table headers
+            float[] columnWidths = {tableWidth / 3, tableWidth / 3, tableWidth / 3};
+            
+            contentStream.beginText();
+            contentStream.newLineAtOffset(margin, yPosition);
+            contentStream.showText("Student");
+            contentStream.newLineAtOffset(columnWidths[0], 0);
+            contentStream.showText("Date");
+            contentStream.newLineAtOffset(columnWidths[1], 0);
+            contentStream.showText("Status");
+            contentStream.endText();
+            
+            yPosition -= rowHeight;
+    
+            // Draw table content
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            
+            for (ClassSessionEntity session : sessions) {
+                List<AttendanceEntity> attendances = attendanceRepo.findByClassSession(session);
+                for (AttendanceEntity attendance : attendances) {
+                    if (yPosition < margin + rowHeight) {
+                        // Create a new page if we're running out of space
+                        PDPage newPage = new PDPage();
+                        document.addPage(newPage);
+                        contentStream.close();  // Close the previous contentStream
+                        contentStream = new PDPageContentStream(document, newPage);  // Reinitialize the contentStream for the new page
+                        contentStream.setFont(PDType1Font.HELVETICA, 12);  // Set font again
+                        yPosition = yStart - rowHeight; // Reset the Y position
+                    }
+    
+                    contentStream.beginText();
+                    contentStream.newLineAtOffset(margin, yPosition);
+                    contentStream.showText(attendance.getStudent().getUsername());
+                    contentStream.newLineAtOffset(columnWidths[0], 0);
+                    contentStream.showText(session.getSessionDateTime().toString());
+                    contentStream.newLineAtOffset(columnWidths[1], 0);
+                    contentStream.showText(attendance.isPresent() ? "Present" : "Absent");
+                    contentStream.endText();
+                    
+                    yPosition -= rowHeight;
+                }
+            }
+        } finally {
+            contentStream.close(); // Close the contentStream after the document is written
+        }
+    
+        // Set response headers and write document
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"attendance_report.pdf\"");
+        document.save(response.getOutputStream());
+        document.close();
+    }    
 }

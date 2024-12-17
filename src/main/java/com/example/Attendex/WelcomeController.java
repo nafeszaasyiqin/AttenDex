@@ -30,8 +30,4 @@ public class WelcomeController {
         return "admin-dashboard"; // Maps to welcome.html
     } */
 
-    @GetMapping("/manage-class")
-    public String manageClasses() {
-        return "lecturer/manage-class"; // Points to templates/lecturer/manage-class.html
-    }
 }

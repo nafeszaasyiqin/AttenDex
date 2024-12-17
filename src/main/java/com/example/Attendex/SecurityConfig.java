@@ -14,12 +14,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
 
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Configuration
 public class SecurityConfig {
@@ -34,10 +30,12 @@ public class SecurityConfig {
     // No need for password encoding for simple comparison
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) ->
                         authorize
                                 .requestMatchers("/admin/admin-dashboard").hasRole("ADMIN")  // Only ADMIN role can access /admin
+                                .requestMatchers("/lecturer/lecturer").hasRole("LECTURER")
+                                .requestMatchers("/student/dashboard").hasRole("STUDENT")
                                 .anyRequest().authenticated()  // Require authentication for all other requests
                 ).formLogin(
                         form -> form
@@ -73,7 +71,7 @@ public class SecurityConfig {
                 response.sendRedirect("/lecturer/lecturer");
             } else if ("ROLE_STUDENT".equals(role)) {
                 System.out.println("Redirecting to /student");
-                response.sendRedirect("/student/student");
+                response.sendRedirect("/student/dashboard");
             } else {
                 System.out.println("Redirecting to /welcome");
                 response.sendRedirect("/welcome");
