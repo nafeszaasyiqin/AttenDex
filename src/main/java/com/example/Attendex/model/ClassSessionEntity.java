@@ -61,4 +61,16 @@ public class ClassSessionEntity {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    @Column(nullable = true)
+    private LocalDateTime codeExpiryDateTime;
+
+    // Getter and Setter
+    public LocalDateTime getCodeExpiryDateTime() {
+        return codeExpiryDateTime;
+    }
+
+    public void setCodeExpiryDateTime(LocalDateTime codeExpiryDateTime) {
+        this.codeExpiryDateTime = codeExpiryDateTime;
+    }
 }

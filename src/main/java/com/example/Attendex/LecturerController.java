@@ -18,6 +18,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.security.SecureRandom;
@@ -45,16 +47,56 @@ public class LecturerController {
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        
+        // Fetch courses with eager loading of related entities
         List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        
+        // Calculate additional dashboard statistics
+        int totalStudents = calculateTotalStudents(lecturer);
+        int totalCourses = courses.size();
+        int todaySessions = calculateTodaySessions(lecturer);
+        
+        // Add attributes to the model
         model.addAttribute("courses", courses);
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("totalCourses", totalCourses);
+        model.addAttribute("todaySessions", todaySessions);
+        
         return "/lecturer/lecturer";
+    }
+
+    // Helper method to calculate total students across lecturer's courses
+    private int calculateTotalStudents(UserEntity lecturer) {
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        Set<UserEntity> uniqueStudents = new HashSet<>();
+        
+        for (CourseEntity course : courses) {
+            // Assuming you have a method to find students enrolled in a course
+            List<UserEntity> courseStudents = userRepo.findStudentsByCourse(course);
+            uniqueStudents.addAll(courseStudents);
+        }
+        
+        return uniqueStudents.size();
+    }
+
+    // Helper method to calculate today's sessions
+    private int calculateTodaySessions(UserEntity lecturer) {
+        LocalDate today = LocalDate.now();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        
+        return (int) courses.stream()
+            .filter(course -> {
+                DayOfWeek courseDay = DayOfWeek.valueOf(course.getDayOfWeek().toUpperCase());
+                return courseDay == today.getDayOfWeek();
+            })
+            .count();
     }
 
     @PostMapping("/generate-code/{courseId}")
     @ResponseBody
     public Map<String, String> generateClassCode(@PathVariable Long courseId) {
         CourseEntity course = courseRepo.findById(courseId).orElseThrow();
-        
+
         // Generate random code
         StringBuilder code = new StringBuilder();
         for (int i = 0; i < CODE_LENGTH; i++) {
@@ -66,10 +108,12 @@ public class LecturerController {
         session.setCourse(course);
         session.setClassCode(code.toString());
         session.setSessionDateTime(LocalDateTime.now());
+        session.setCodeExpiryDateTime(LocalDateTime.now().plusMinutes(10)); // Set expiration time
         classSessionRepo.save(session);
 
         Map<String, String> response = new HashMap<>();
         response.put("code", code.toString());
+        response.put("expiresAt", session.getCodeExpiryDateTime().toString()); // Optional: Send expiration info
         return response;
     }
 

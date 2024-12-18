@@ -2,6 +2,12 @@ package com.example.Attendex.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+
+import java.util.List;
+
 import jakarta.persistence.Column;
 
 @Entity
@@ -49,4 +55,13 @@ public class UserEntity {
     public void setRole(String role) {
         this.role = role;
     }
+
+    @ManyToMany
+    @JoinTable(
+        name = "course_students", // Join table name
+        joinColumns = @JoinColumn(name = "student_username", referencedColumnName = "username"), // Column in join table pointing to UserEntity
+        inverseJoinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id") // Column in join table pointing to CourseEntity
+    )
+    private List<CourseEntity> enrolledCourses;
+
 }

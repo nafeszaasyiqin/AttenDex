@@ -2,6 +2,7 @@ package com.example.Attendex.model;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,13 +27,8 @@ public class CourseEntity {
     @JoinColumn(name = "lecturer_username")
     private UserEntity lecturer;
 
-    @ManyToMany
-    @JoinTable(
-        name = "course_students",
-        joinColumns = @JoinColumn(name = "course_id"),
-        inverseJoinColumns = @JoinColumn(name = "student_username")
-    )
-    private Set<UserEntity> students;
+    @ManyToMany(mappedBy = "enrolledCourses")
+    private List<UserEntity> students;
 
     // Getters and setters
     public Long getId() {
@@ -83,11 +79,11 @@ public class CourseEntity {
         this.lecturer = lecturer;
     }
 
-    public Set<UserEntity> getStudents() {
+    public List<UserEntity> getStudents() {
         return students;
     }
 
-    public void setStudents(Set<UserEntity> students) {
+    public void setStudents(List<UserEntity> students) {
         this.students = students;
     }
 }

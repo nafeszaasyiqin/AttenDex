@@ -129,31 +129,35 @@ public class StudentController {
             @RequestParam Long courseId,
             @RequestParam String code,
             Authentication authentication) {
-                
         
-        // Get current student
+        // Get the current student
         UserEntity student = userRepo.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-
+    
         // Find active session with the given code
-        Optional<ClassSessionEntity> session = classSessionRepo.findByClassCodeAndActive(code, true);
+        Optional<ClassSessionEntity> sessionOptional = classSessionRepo.findByClassCodeAndActive(code, true);
         
-        if (session.isEmpty()) {
+        if (sessionOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Invalid or expired code");
         }
-
+    
+        // Verify the session's expiration
+        ClassSessionEntity classSession = sessionOptional.get();
+        if (LocalDateTime.now().isAfter(classSession.getCodeExpiryDateTime())) {
+            return ResponseEntity.badRequest().body("This code has expired");
+        }
+    
         // Verify the code belongs to the correct course
-        ClassSessionEntity classSession = session.get();
         if (!classSession.getCourse().getId().equals(courseId)) {
             return ResponseEntity.badRequest().body("Invalid code for this course");
         }
-
-        // Check if attendance already marked
+    
+        // Check if attendance is already marked
         boolean alreadyMarked = attendanceRepo.existsByClassSessionAndStudent(classSession, student);
         if (alreadyMarked) {
             return ResponseEntity.badRequest().body("Attendance already marked");
         }
-
+    
         // Mark attendance
         AttendanceEntity attendance = new AttendanceEntity();
         attendance.setClassSession(classSession);
@@ -161,9 +165,9 @@ public class StudentController {
         attendance.setPresent(true);
         attendance.setTimestamp(LocalDateTime.now());
         attendanceRepo.save(attendance);
-
+    
         return ResponseEntity.ok("Attendance marked successfully");
-    }
+    }    
 
     @GetMapping("/attendance-history")
     public String attendanceHistory(Model model, Authentication authentication) {

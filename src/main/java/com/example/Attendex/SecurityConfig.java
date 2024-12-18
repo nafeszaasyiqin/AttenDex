@@ -68,7 +68,7 @@ public class SecurityConfig {
                 response.sendRedirect("/admin/admin-dashboard");
             } else if ("ROLE_LECTURER".equals(role)) {
                 System.out.println("Redirecting to /lecturer");
-                response.sendRedirect("/lecturer/lecturer");
+                response.sendRedirect("/lecturer/dashboard");
             } else if ("ROLE_STUDENT".equals(role)) {
                 System.out.println("Redirecting to /student");
                 response.sendRedirect("/student/dashboard");
