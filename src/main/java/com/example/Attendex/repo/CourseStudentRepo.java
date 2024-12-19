@@ -21,6 +21,9 @@ public interface CourseStudentRepo extends JpaRepository<CourseStudent, Long> {
     // Check if a student is already registered for a specific course
     boolean existsByCourseEntityAndStudent(CourseEntity courseEntity, UserEntity student);
 
+    @Query("SELECT COUNT(cs) FROM CourseStudent cs WHERE cs.student = :student")
+    int countRegistrationsByStudent(UserEntity student);
+
     // Custom query to fetch usernames of students registered for a specific course
     @Query("SELECT cs.student.username FROM CourseStudent cs WHERE cs.courseEntity = :courseEntity")
     List<String> findStudentUsernamesByCourseEntity(CourseEntity courseEntity);

@@ -280,7 +280,20 @@ public class StudentController {
                     .orElseThrow(() -> new RuntimeException("Student not found"));
 
             List<AttendanceEntity> attendanceHistory = attendanceRepo.findByStudentOrderByTimestampDesc(student);
+            // Total registered classes
+            int totalClasses = courseStudentRepo.countRegistrationsByStudent(student);
+
+            // Total attended classes
+            int attendedClasses = attendanceHistory.size();
+
+            // Calculate attendance rate
+            double attendanceRate = (totalClasses > 0) ? ((double) attendedClasses / totalClasses) * 100 : 0.0;
+
+            // Add attributes to the model
             model.addAttribute("attendanceHistory", attendanceHistory);
+            model.addAttribute("totalClasses", totalClasses);
+            model.addAttribute("attendedClasses", attendedClasses);
+            model.addAttribute("attendanceRate", String.format("%.2f", attendanceRate));
 
             return "student/attendance-history";
         }
