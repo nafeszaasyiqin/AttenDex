@@ -74,6 +74,7 @@ public class StudentController {
     }
 
     // Show the course registration page
+
     @GetMapping("/course-register")
     public String showAvailableCourses(Model model, Authentication authentication) {
         try {
