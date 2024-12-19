@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<UserEntity, String> {
     Optional<UserEntity> findByUsername(String username);  // Find user by username
     long countByRole(String role); // Count users by role
-    
-    @Query("SELECT DISTINCT u FROM UserEntity u JOIN u.enrolledCourses ec WHERE ec = :course")
+
+    @Query("SELECT u FROM UserEntity u JOIN u.enrolledCourses ec WHERE ec = :course")
     List<UserEntity> findStudentsByCourse(@Param("course") CourseEntity course);
 }

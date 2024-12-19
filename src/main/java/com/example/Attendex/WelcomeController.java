@@ -24,10 +24,9 @@ public class WelcomeController {
 
 
 
-    /*
-    @GetMapping("/admin-dashboard")
+    @GetMapping("/lecturer/register-class")
     public String Administrator() {
-        return "admin-dashboard"; // Maps to welcome.html
-    } */
+        return "lecturer/register-class"; // Maps to welcome.html
+    }
 
 }

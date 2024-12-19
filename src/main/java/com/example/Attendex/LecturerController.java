@@ -5,6 +5,7 @@ import com.example.Attendex.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +17,14 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.security.SecureRandom;
 
@@ -116,6 +120,58 @@ public class LecturerController {
         response.put("expiresAt", session.getCodeExpiryDateTime().toString()); // Optional: Send expiration info
         return response;
     }
+    @GetMapping("/generate-class")
+    public String addclass(Model model, Authentication authentication) {
+        UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
+        model.addAttribute("courses", courses);
+        return "/lecturer/generate-class";
+    }
+
+    @PostMapping("/generate-class")
+    @ResponseBody
+    public Map<String, String> generateClass(
+            @RequestParam("courseName") String courseName,
+            @RequestParam("startTime") String startTime,  // Change 'startDate' to 'startTime'
+            @RequestParam("endTime") String endTime,      // Change 'endDate' to 'endTime'
+            @RequestParam("dayOfWeek") String dayOfWeek) {
+
+        // Get the username of the currently authenticated lecturer
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String lecturerUsername = authentication.getName();  // This gives you the logged-in lecturer's username
+
+        // Convert the start and end time strings to LocalTime (ensure they're in the correct format)
+        LocalTime start = LocalTime.parse(startTime);  // Use startTime
+        LocalTime end = LocalTime.parse(endTime);      // Use endTime
+
+        // Retrieve the UserEntity for the lecturer directly using the injected UserRepository
+        UserEntity lecturer = userRepo.findByUsername(lecturerUsername)
+                .orElseThrow(() -> new RuntimeException("Lecturer not found"));
+
+        // Create a new CourseEntity
+        CourseEntity course = new CourseEntity();
+        course.setCourseName(courseName);
+        course.setDayOfWeek(dayOfWeek);
+        course.setStartTime(start);
+        course.setEndTime(end);
+        course.setLecturer(lecturer);
+
+        // Save the course to the database
+        courseRepo.save(course);
+
+        // Create a response map to return
+        Map<String, String> response = new HashMap<>();
+        response.put("courseName", courseName);
+        response.put("dayOfWeek", dayOfWeek);
+        response.put("startTime", start.toString());  // Return as string
+        response.put("endTime", end.toString());      // Return as string
+
+        return response; // This will return the data as JSON
+    }
+
+
+
+
 
     @GetMapping("/view-attendance")
     public String viewAttendance(Model model, Authentication authentication) {
