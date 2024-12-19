@@ -98,7 +98,10 @@ public class LecturerController {
 
     @PostMapping("/generate-code/{courseId}")
     @ResponseBody
-    public Map<String, String> generateClassCode(@PathVariable Long courseId) {
+    public Map<String, String> generateClassCode(@PathVariable Long courseId, Model model, Authentication authentication) {
+
+        UserEntity lecturer = userRepo.findByUsername(authentication.getName()).orElseThrow();
+        List<CourseEntity> courses = courseRepo.findByLecturer(lecturer);
         CourseEntity course = courseRepo.findById(courseId).orElseThrow();
 
         // Generate random code
@@ -115,9 +118,18 @@ public class LecturerController {
         session.setCodeExpiryDateTime(LocalDateTime.now().plusMinutes(10)); // Set expiration time
         classSessionRepo.save(session);
 
+        // Count today's sessions for this lecturer
+        LocalDate today = LocalDate.now();
+        long todaySessions = classSessionRepo.countByCourseLecturerAndSessionDateTimeBetween(
+                lecturer,
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
         Map<String, String> response = new HashMap<>();
         response.put("code", code.toString());
         response.put("expiresAt", session.getCodeExpiryDateTime().toString()); // Optional: Send expiration info
+        response.put("todaySessions", String.valueOf(todaySessions));
         return response;
     }
     @GetMapping("/generate-class")

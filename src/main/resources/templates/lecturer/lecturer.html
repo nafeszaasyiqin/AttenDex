@@ -292,11 +292,18 @@
                 button.html('<i class="fas fa-spinner fa-spin"></i> Generating...');
                 
                 $.post(`/lecturer/generate-code/${courseId}`, function(response) {
-                    codeDisplay.find('.code-value').text(response.code);
-                    codeDisplay.slideDown();
-                    button.prop('disabled', false);
-                    button.html('<i class="fas fa-qrcode"></i> Generate Code');
-                });
+                // Display the generated code
+                codeDisplay.find('.code-value').text(response.code);
+                codeDisplay.slideDown();
+
+                // Update today's sessions count
+                $('.stat-value').text(response.todaySessions);
+
+                // Re-enable button
+                button.prop('disabled', false);
+                button.html('<i class="fas fa-qrcode"></i> Generate Code');
+            });
+
             });
 
             $('.copy-code').click(function() {

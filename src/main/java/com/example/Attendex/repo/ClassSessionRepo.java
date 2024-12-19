@@ -2,6 +2,7 @@ package com.example.Attendex.repo;
 
 import com.example.Attendex.model.ClassSessionEntity;
 import com.example.Attendex.model.CourseEntity;
+import com.example.Attendex.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,4 +13,6 @@ public interface ClassSessionRepo extends JpaRepository<ClassSessionEntity, Long
     List<ClassSessionEntity> findByCourseAndSessionDateTimeBetween(CourseEntity course, LocalDateTime start, LocalDateTime end);
     Optional<ClassSessionEntity> findByClassCodeAndActive(String classCode, boolean active);
     Long countByCourse(CourseEntity course);
+    long countByCourseLecturerAndSessionDateTimeBetween(UserEntity lecturer, LocalDateTime start, LocalDateTime end);
+
 }
